@@ -3,26 +3,14 @@
 @import "octicon-utf-codes";
 
 .workspace .command-toolbar {
-  position:   relative;
   font-size:  12px; 
   box-shadow: inset 0 -8px 8px -4px rgba(0, 0, 0, 0.15);
   
-  .toolbar-horiz {
-    background-image: 
-        -webkit-linear-gradient(top, @app-background-color, 
-                                     @tab-bar-background-color);
-  }
-  .toolbar-vert {
-    background-image: 
-        -webkit-linear-gradient(left, @app-background-color, 
-                                      @tab-bar-background-color);
-  }
-  
   .btn{
-    margin: 0 2px 2px 0;
     height:        20px;
     line-height:    1.7;
     display:      block;
+    padding: 1px 2px;
   }
   .settings-btn {
     font-family: 'Octicons Regular';
@@ -48,3 +36,23 @@
     background-color: @button-background-color-hover;
   }
 }
+
+.workspace .command-toolbar.toolbar-horiz {
+  background-image: 
+      -webkit-linear-gradient(@app-background-color, 
+                              @tab-bar-background-color);
+  .btn {
+    position: relative;
+    top: -2px;
+    margin-right: 2px;
+  }
+}
+.workspace .command-toolbar.toolbar-vert {
+  background-image: 
+      -webkit-linear-gradient(to right, @app-background-color, 
+                                        @tab-bar-background-color);
+  .btn {
+    margin: 0 2px 2px 2px;
+  }
+}
+

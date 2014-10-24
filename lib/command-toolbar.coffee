@@ -17,7 +17,7 @@ class CommandToolbar
   toggle: (forceOn) ->
     if forceOn or not @state.opened
       @state.opened = yes
-      @toolbarView ?= new ToolbarView @
+      @toolbarView ?= new ToolbarView @, @state
       @toolbarView.show()
     else
       @state.opened = no
