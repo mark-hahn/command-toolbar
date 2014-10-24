@@ -1,4 +1,4 @@
 command-toolbar
 ===============
 
-Atom editor package to add toolbar with buttons for any command
+Atom editor package to add a toolbar with buttons for any command
