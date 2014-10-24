@@ -1,38 +1,38 @@
 
 # lib/toolbar-view
 
-{$, View}  = require 'atom'
+{$, $$, View}  = require 'atom'
+Finder     = require './finder'
 
 module.exports =
 class ToolbarView extends View
   
   @content: ->
     @div class:'command-toolbar toolbar-horiz', tabindex:-1, =>
-      @span class:'settings-btn'
-      
-      @div  class:'btn', 'Cmd Tab'
-      @div  class:'btn', 'btn2'
-      @div  class:'btn', 'btn3'
-      @div  class:'btn', 'btn4'
-        
+      @span outlet:'createBtn', class:'create-btn'
+              
   initialize: (commandToolbar, @state) ->
-    @setSide @state.side
+    @buttons = []
+    @setSide null, yes
+    for btn in (@state.buttons ?= []) then @addBtn btn...
     
-    @setSide 'top'
-    setTimeout (=> @setSide 'bottom'),  3000
-    
-    # @subscribe @, 'click', (e) ->
-    #   if (classes = $(e.target).attr 'class') and 
-    #      (btnIdx  = classes.indexOf 'octicon-') > -1
-    #     switch classes[btnIdx+8...]
-    #       when 'globe'       then command.destroyToolbar()
-    #       when 'arrow-left'  then command.back()
-    #       when 'arrow-right' then command.forward()
-    #       when 'sync'        then command.refresh()
-    #       
-    
-  setSide: (side = 'top') ->
-    @state.side = side
+    @subscribe @createBtn, 'click', (e) =>
+      new Finder().attach (name) => @addBtn name, name, yes
+  
+  addBtn: (label, cmd, newBtn) ->
+    @createBtn.after (newBtnView = $$ -> @div class:'btn', label)
+    @setSide null, yes
+    newBtnView.attr 'data-cmd', cmd
+    if newBtn 
+      @buttons.unshift newBtnView
+      @state.buttons.unshift [label, cmd]
+    else 
+      @buttons.push newBtnView
+      
+  setSide: (side, refresh) ->
+    if side then @state.side = side
+    if not refresh and side is @state.side then return
+    @state.side ?= 'top'
     lftRight = =>
       @removeClass('toolbar-vert').addClass('toolbar-horiz')
       @find('.btn').css display: 'inline-block'
@@ -40,12 +40,14 @@ class ToolbarView extends View
       @removeClass('toolbar-horiz').addClass('toolbar-vert')
       @find('.btn').css display: 'block'
     @detach()
-    switch side
-      when 'top'    then lftRight();  atom.workspaceView.prependToTop   @
-      when 'bottom' then lftRight();  atom.workspaceView.appendToBottom @
+    switch @state.side
       when 'left'   then topBottom(); atom.workspaceView.prependToLeft  @
       when 'right'  then topBottom(); atom.workspaceView.appendToRight  @
+      when 'bottom' then lftRight();  atom.workspaceView.appendToBottom @
+      else               lftRight();  atom.workspaceView.prependToTop   @
         
+  edit: (idx) ->
+    
     
   destroy: ->
     @unsubscribe()
