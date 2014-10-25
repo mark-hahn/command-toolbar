@@ -12,7 +12,7 @@ class ToolbarView extends View
       @span outlet:'createBtn', class:'create-btn'
               
   initialize: (commandToolbar, @state) ->
-    @update 'top', yes
+    @update null, yes
     @createBtn.setTooltip title: 'Create Button or Drag Toolbar'
     for btn in (@state.buttons ?= []) then @addBtn btn...
     @subscribe @createBtn, 'click', (e) =>
@@ -85,12 +85,10 @@ class ToolbarView extends View
   executeCmd: (e) ->
     prevFocusedEle = $ ':focus'
     if prevFocusedEle[0] and prevFocusedEle[0] isnt document.body
-      eventEle = prevFocusedEle
-    else
-      eventEle = atom.workspaceView
+         eventEle = prevFocusedEle
+    else eventEle = atom.workspaceView
     if @buttonEditing and @buttonEditing[0] isnt e.target then @stopEditing()
-    $btn = @get$Btn e
-    cmd  = $btn.attr 'data-cmd'
+    cmd = @get$Btn(e).attr 'data-cmd'
     eventEle[0].dispatchEvent new CustomEvent cmd, bubbles: true, cancelable: true
   
   btnClick: (e) ->
@@ -109,6 +107,7 @@ class ToolbarView extends View
     @initMouseX  = e.pageX
     @initMouseY  = e.pageY
     @draggingBtn = $btn
+    @draggingOrigIdx = $btn.index()-1
     @draggingBtn.addClass 'dragging'
     
   stopDragging: (del) ->
@@ -122,20 +121,45 @@ class ToolbarView extends View
     
   btnMousedown: (e) ->
     if @buttonEditing then return 
-    console.log 'btnMousedown', e.pageY
     @startDragging e
     false
+    
+  chkDelete: (init, initOrth, pos, posOrth) ->
+    if not (initOrth - 60 < posOrth < initOrth + 60)
+      @stopDragging yes
+      yes
+
+  chkRearrange: (init, initOrth, pos, posOrth) ->
+    ofs  = pos - init
+    dist = Math.floor Math.abs(ofs) / 20
+    if dist & 1 then return
+    dist /= 2
+    numBtns = @state.buttons.length
+    newIdx = @draggingOrigIdx + (if ofs < 0 then -dist else dist)
+    newIdx = Math.max 0, Math.min numBtns-1, newIdx
+    curIdx = @draggingBtn.index()-1
+    if newIdx is curIdx then return
+    $btns = @find('.btn').remove()
+    srcIdx = dstIdx = 0
+    while dstIdx < numBtns
+      switch 
+        when dstIdx is   newIdx then @append $btns.eq curIdx;   dstIdx++
+        when srcIdx isnt curIdx then @append $btns.eq srcIdx++; dstIdx++
+        else srcIdx++
+    buttons = @state.buttons = []
+    @find('.btn').each ->
+      $btn = $ @
+      buttons.push [$btn.text(), $btn.attr 'data-cmd']
 
   mousemove: (e) ->
     if not @draggingBtn then return
-    console.log 'mousemove', e.which, @initMouseY, e.pageY
     if @buttonEditing or (e.which & 1) is 0 then @stopDragging(); return
-    [init, mouse] =
-      (if @state.side in ['top', 'bottom'] then [@initMouseY, e.pageY]  \
-                                           else [@initMouseX, e.pageX])
-    if not (init - 60 < mouse < init + 60)
-      @stopDragging yes
-      return
+    posArr =
+      (if @state.side in ['top', 'bottom'] 
+           [@initMouseX, @initMouseY, e.pageX, e.pageY]
+      else [@initMouseY, @initMouseX, e.pageY, e.pageX])
+    if not @chkDelete posArr...
+      @chkRearrange posArr...
     false
       
   setupBtnEvents: ->
