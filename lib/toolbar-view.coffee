@@ -3,13 +3,14 @@
 
 {$, $$, View}  = require 'atom'
 fs             = require 'fs'
+_              = require 'underscore-plus'
 Finder         = require './finder'
 
 module.exports =
 class ToolbarView extends View
   
   @content: ->
-    @div class:'command-toolbar toolbar-horiz', tabindex:-1, =>
+    @div class:'command-toolbar toolbar-horiz', =>
       @div outlet:'newBtn', class:'new-btn command-toolbar-btn'
               
   initialize: (commandToolbar, @state) ->
@@ -43,12 +44,12 @@ class ToolbarView extends View
     winX   = atom.workspaceView.width()
     winY   = atom.workspaceView.height()
     text   = if newBtn then 'Create Button Or Drag Toolbar'  \
-                     else $btn.attr 'data-cmd'
+                       else $btn.attr 'data-cmd'
     style = switch @state.side
       when 'top'    then "left:  #{ofs.left}px;        top:    #{ofs.top+hgt+15}px"  
       when 'right'  then "right: #{winX-ofs.left+5}px; top:    #{ofs.top-3}px"
       when 'bottom' then "left:  #{ofs.left}px;        bottom: #{winY-ofs.top+5}px"
-      when 'left'   then "left:  #{ofs.left+wid+15}px;  top:    #{ofs.top-3}px"
+      when 'left'   then "left:  #{ofs.left+wid+15}px; top:    #{ofs.top-3}px"
     @$tooltip = $ "<div class='command-toolbar-tooltip' style='#{style}'>#{text}</div>"
     atom.workspaceView.append @$tooltip
     @tooltipCloseTimeout = setTimeout (=> @closeTooltip()), 2000
@@ -108,7 +109,7 @@ class ToolbarView extends View
           return false
       if oldLabel? then return
     newBtnView = $$ -> 
-      @div class:'btn native-key-bindings command-toolbar-btn', tabIndex:-1, label
+      @div class:'btn native-key-bindings command-toolbar-btn', label
     if newBtn then @newBtn.after newBtnView
     else @append newBtnView
     @updateSide null, yes
@@ -125,7 +126,6 @@ class ToolbarView extends View
     $btn = @get$Btn e
     $btn.attr contenteditable: yes
     $btn.css cursor: 'text'
-    $btn.focus()
     @buttonEditing = $btn
     
   stopEditing: ->
@@ -142,8 +142,12 @@ class ToolbarView extends View
          eventEle = prevFocusedEle
     else eventEle = atom.workspaceView
     if @buttonEditing and @buttonEditing[0] isnt e.target then @stopEditing()
-    cmd = @get$Btn(e).attr 'data-cmd'
-    eventEle[0].dispatchEvent new CustomEvent cmd, bubbles: true, cancelable: true
+    name = @get$Btn(e).attr 'data-cmd'
+    for eventName, eventDescription of _.extend($(window).events(), eventEle.events())
+      if eventDescription
+        eventEle.trigger name
+        return
+    eventEle.dispatchEvent(new CustomEvent(name, bubbles: true, cancelable: true))
   
   btnClick: (e) ->
     if e.ctrlKey then @startEditing e; return
@@ -180,7 +184,6 @@ class ToolbarView extends View
     
   startDragging: (e) ->
     $btn = @get$Btn e
-    $btn.focus()
     @initMouseX  = e.pageX
     @initMouseY  = e.pageY
     @draggingBtn = $btn

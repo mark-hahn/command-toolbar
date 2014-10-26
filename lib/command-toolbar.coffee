@@ -35,7 +35,6 @@ class CommandToolbar
       @toolbarView.saveState()
       @toolbarView?.hide()
           
-  getToolbar:     -> @toolbarView
   destroyToolbar: -> @toolbarView?.destroy()
     
   deactivate: ->

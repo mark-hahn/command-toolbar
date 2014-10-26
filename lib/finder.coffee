@@ -50,4 +50,3 @@ class CommandPaletteView extends SelectListView
     @cancel()
     @callback name
     
-    
