@@ -2,7 +2,8 @@
 # lib/toolbar-view
 
 {$, $$, View}  = require 'atom'
-Finder     = require './finder'
+fs             = require 'fs'
+Finder         = require './finder'
 
 module.exports =
 class ToolbarView extends View
@@ -22,6 +23,12 @@ class ToolbarView extends View
       false
     @setupBtnEvents()
     
+  saveState: ->
+    try
+      fs.writeFileSync @state.statePath, JSON.stringify @state
+    catch e
+      console.log 'command-toolbar error saving state file:', e.message
+      
   chkTooltip: (e) ->
     now = Date.now()
     @tooltipHoverMS ?= now
@@ -61,6 +68,7 @@ class ToolbarView extends View
     if not refresh and side is @state.side then return
     if side then @state.side = side
     @state.side ?= 'top'
+    @saveState()
     lftRight = =>
       @removeClass('toolbar-vert').addClass('toolbar-horiz')
       @find('.btn').css display: 'inline-block'
@@ -105,7 +113,9 @@ class ToolbarView extends View
     else @append newBtnView
     @updateSide null, yes
     newBtnView.attr 'data-cmd', cmd
-    if newBtn then @state.buttons.unshift [label, cmd]
+    if newBtn 
+      @state.buttons.unshift [label, cmd]
+      @saveState()
     
   startEditing: (e) -> 
     if @buttonEditing and @buttonEditing[0] is e.target 
@@ -123,6 +133,7 @@ class ToolbarView extends View
     @buttonEditing.css cursor: 'pointer'
     @buttonEditing.attr contenteditable: no
     @state.buttons[@buttonEditing.index()-1][0] = @buttonEditing.text()
+    @saveState()
     @buttonEditing = null
   
   executeCmd: (e) ->
@@ -183,6 +194,7 @@ class ToolbarView extends View
     if del 
       @state.buttons.splice @draggingBtn.index()-1, 1
       @draggingBtn.remove()
+      @saveState()
     else @draggingBtn.removeClass 'dragging'
     @draggingBtn = null;
     false
@@ -224,6 +236,7 @@ class ToolbarView extends View
     @find('.btn').each ->
       $btn = $ @
       buttons.push [$btn.text(), $btn.attr 'data-cmd']
+    @saveState()
 
   mousemove: (e) ->
     if not @draggingBtn and not @draggingToolbar then return
