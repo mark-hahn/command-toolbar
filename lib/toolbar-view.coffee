@@ -150,7 +150,7 @@ class ToolbarView extends View
     eventEle.dispatchEvent(new CustomEvent(name, bubbles: true, cancelable: true))
   
   btnClick: (e) ->
-    if e.ctrlKey then @startEditing e; return
+    if e.ctrlKey or e.altKey then @startEditing e; return
     if e.target is @buttonEditing?[0] then return
     @executeCmd e
     
@@ -208,6 +208,8 @@ class ToolbarView extends View
     false
     
   btnMousedown: (e) ->
+    if @buttonEditing or e.ctrlKey then return 
+
     if @buttonEditing then return 
     @startDragging e
     false

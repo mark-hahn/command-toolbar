@@ -15,6 +15,7 @@ Run `apm install command-toolbar` or use the settings screen.
 * **Execute** a command by simply clicking on its button.
 * **Create** a button by clicking on the first icon (three bars). A selection box identical to the command palette will pop up.  Choose a command and a new button for that command will appear in the toolbar.
 * **Edit** a button label by clicking on the button with the ctrl key held down.
+  * Note: There is currently a problem with ctrl-click on some setups.  If you have trouble you may use alt-click instead.
 * **Rearrange** buttons by clicking and dragging them.
 * **Delete** buttons by clicking on the button and dragging the cursor away from the bar.  The btn will not move before deletion.
 * **Move** the toolbar to any of the four sides of the window by clicking on the first icon (three bars) and dragging the cursor to the middle of a different side.
