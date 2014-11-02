@@ -1,4 +1,7 @@
 
+## 1.0.0 - 2014-11-02
+* Added support for files and web pages
+
 ## 0.1.3 - 2014-10-29
 * Because of a problem with ctrl-click on some setups you may now optionally use alt-click instead.
 

@@ -1,7 +1,7 @@
 {
   "name": "command-toolbar",
   "main": "./lib/command-toolbar",
-  "version": "0.1.3",
+  "version": "1.0.0",
   "description": "A toolbar with easily customized buttons for any command.",
   "activationEvents": [],
   "repository": "https://github.com/mark-hahn/command-toolbar",

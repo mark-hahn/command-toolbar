@@ -20,7 +20,10 @@ class ToolbarView extends View
     @subscribe @, closeTtEvents, '.command-toolbar-btn',     => @closeTooltip()
     for btn in (@state.buttons ?= []) then @addBtn btn...
     @subscribe @newBtn, 'click', (e) =>
-      new Finder().attach (name) => @addBtn name, name, yes
+      if e.ctrlKey or e.altKey
+        @addTabBtn()
+      else
+        new Finder().attach (name) => @addBtn name, name, yes
       false
     @setupBtnEvents()
     
@@ -43,7 +46,8 @@ class ToolbarView extends View
     hgt    = $btn.height()
     winX   = atom.workspaceView.width()
     winY   = atom.workspaceView.height()
-    text   = if newBtn then 'Create Button Or Drag Toolbar'  \
+    text   = if newBtn then 'Create Button Or Drag Toolbar<br>' +
+                            'Ctrl-Click To Add Current Tab'\
                        else $btn.attr 'data-cmd'
     style = switch @state.side
       when 'top'    then "left:  #{ofs.left}px;        top:    #{ofs.top+hgt+15}px"  
@@ -52,7 +56,8 @@ class ToolbarView extends View
       when 'left'   then "left:  #{ofs.left+wid+15}px; top:    #{ofs.top-3}px"
     @$tooltip = $ "<div class='command-toolbar-tooltip' style='#{style}'>#{text}</div>"
     atom.workspaceView.append @$tooltip
-    @tooltipCloseTimeout = setTimeout (=> @closeTooltip()), 2000
+    @tooltipCloseTimeout = setTimeout (=> @closeTooltip()), 
+                                        (if newBtn then 4000 else 2000)
     return false
         
   closeTooltip: ->
@@ -118,6 +123,12 @@ class ToolbarView extends View
       @state.buttons.unshift [label, cmd]
       @saveState()
     
+  addTabBtn: ->
+    if (cmd = editor = atom.workspace.getActivePaneItem()?.getPath?())
+      if not /^https?:\/\//i.test cmd
+        cmd = 'file://' + cmd
+      @addBtn cmd, cmd, yes
+    
   startEditing: (e) -> 
     if @buttonEditing and @buttonEditing[0] is e.target 
       return
@@ -143,11 +154,14 @@ class ToolbarView extends View
     else eventEle = atom.workspaceView
     if @buttonEditing and @buttonEditing[0] isnt e.target then @stopEditing()
     name = @get$Btn(e).attr 'data-cmd'
-    for eventName, eventDescription of _.extend($(window).events(), eventEle.events())
-      if eventDescription
-        eventEle.trigger name
-        return
-    eventEle.dispatchEvent(new CustomEvent(name, bubbles: true, cancelable: true))
+    if /^(https?|file):\/\//i.test name
+      atom.workspace.open name.replace /^file:\/\//, ''
+    else
+      for eventName, eventDescription of _.extend($(window).events(), eventEle.events())
+        if eventDescription
+          eventEle.trigger name
+          return
+      eventEle.dispatchEvent(new CustomEvent(name, bubbles: true, cancelable: true))
   
   btnClick: (e) ->
     if e.ctrlKey or e.altKey then @startEditing e; return
