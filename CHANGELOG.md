@@ -1,4 +1,7 @@
 
+## 1.0.2 - 2015-01-19
+* Fixed deprecations
+
 ## 1.0.0 - 2014-11-02
 * Added support for files and web pages
 

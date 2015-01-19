@@ -1,7 +1,8 @@
 
 # lib/toolbar-view
 
-{$, $$, View}  = require 'atom'
+{CompositeDisposable} = require 'atom'
+{$, $$, View}  = require 'atom-space-pen-views'
 fs             = require 'fs'
 _              = require 'underscore-plus'
 Finder         = require './finder'
@@ -14,12 +15,15 @@ class ToolbarView extends View
       @div outlet:'newBtn', class:'new-btn command-toolbar-btn'
               
   initialize: (commandToolbar, @state) ->
+    @subs = new CompositeDisposable
+    @$workspace = $ atom.views.getView atom.workspace
     @updateSide null, yes
+    
     closeTtEvents = 'mousedown mouseout mouseleave'
-    @subscribe @, 'mouseover',   '.command-toolbar-btn', (e) => @chkTooltip e
-    @subscribe @, closeTtEvents, '.command-toolbar-btn',     => @closeTooltip()
+    @subs.add @.on 'mouseover',   '.command-toolbar-btn', (e) => @chkTooltip e
+    @subs.add @.on closeTtEvents, '.command-toolbar-btn',     => @closeTooltip()
     for btn in (@state.buttons ?= []) then @addBtn btn...
-    @subscribe @newBtn, 'click', (e) =>
+    @subs.add @newBtn.on 'click', (e) =>
       if e.ctrlKey or e.altKey
         @addTabBtn()
       else
@@ -44,8 +48,9 @@ class ToolbarView extends View
     newBtn = ($btn.is ':first-child')
     wid    = $btn.width() + (if newBtn then 10 else 0)
     hgt    = $btn.height()
-    winX   = atom.workspaceView.width()
-    winY   = atom.workspaceView.height()
+    workspaceEle = atom.views.getView atom.workspace
+    winX   = workspaceEle.offsetWidth
+    winY   = workspaceEle.offsetHeight
     text   = if newBtn then 'Create Button Or Drag Toolbar<br>' +
                             'Ctrl-Click To Add Current Tab'\
                        else $btn.attr 'data-cmd'
@@ -55,7 +60,7 @@ class ToolbarView extends View
       when 'bottom' then "left:  #{ofs.left}px;        bottom: #{winY-ofs.top+5}px"
       when 'left'   then "left:  #{ofs.left+wid+15}px; top:    #{ofs.top-3}px"
     @$tooltip = $ "<div class='command-toolbar-tooltip' style='#{style}'>#{text}</div>"
-    atom.workspaceView.append @$tooltip
+    @$workspace.append @$tooltip
     @tooltipCloseTimeout = setTimeout (=> @closeTooltip()), 
                                         (if newBtn then 4000 else 2000)
     return false
@@ -85,16 +90,16 @@ class ToolbarView extends View
     switch @state.side
       when 'left'   
         topBottom()
-        atom.workspaceView.prependToLeft  @
+        atom.workspace.addLeftPanel   item: @
       when 'right'  
         topBottom()
-        atom.workspaceView.appendToRight  @
+        atom.workspace.addRightPanel  item: @
       when 'bottom' 
         lftRight()
-        atom.workspaceView.appendToBottom @
+        atom.workspace.addBottomPanel item: @
       else               
         lftRight()
-        atom.workspaceView.prependToTop   @
+        atom.workspace.addTopPanel    item: @
         
   get$Btn: (e) -> $(e.target).closest('.btn')
     
@@ -151,7 +156,7 @@ class ToolbarView extends View
     prevFocusedEle = $ ':focus'
     if prevFocusedEle[0] and prevFocusedEle[0] isnt document.body
          eventEle = prevFocusedEle
-    else eventEle = atom.workspaceView
+    else eventEle = atom.views.getView atom.workspace
     if @buttonEditing and @buttonEditing[0] isnt e.target then @stopEditing()
     name = @get$Btn(e).attr 'data-cmd'
     if /^(https?|file):\/\//i.test name
@@ -183,8 +188,8 @@ class ToolbarView extends View
     distX  = e.pageX - @initMouseX
     distY  = e.pageY - @initMouseY
     distSq = distX*distX + distY*distY
-    gridW = atom.workspaceView.width()  / 3
-    gridH = atom.workspaceView.height() / 3
+    gridW = @$workspace.width()  / 3
+    gridH = @$workspace.height() / 3
     inMiddleCol = (gridW < e.pageX < gridW*2)
     inMiddleRow = (gridH < e.pageY < gridH*2)
     side = switch
@@ -269,17 +274,18 @@ class ToolbarView extends View
       if not @chkDelete posArr...
         @chkRearrange posArr...
     false
-      
+    
   setupBtnEvents: ->
-    @subscribe atom.workspaceView, 'blur', '[contenteditable]', => @stopEditing()
-    @subscribe atom.workspaceView, 'mouseup',                   => @stopDragging()
-    @subscribe atom.workspaceView, 'mousemove',             (e) => @mousemove       e
-    @subscribe @,                  'mousedown', '.new-btn', (e) => @newBtnMouseDown e
-    @subscribe @,                  'mousedown', '.btn',     (e) => @btnMousedown    e
-    @subscribe @,                  'keydown',   '.btn',     (e) => @btnKeyDown      e
-    @subscribe @,                  'click',     '.btn',     (e) => @btnClick        e
+    $body = $ 'body'
+    @subs.add $body.on '[contenteditable]',         => @stopEditing()
+    @subs.add $body.on 'mouseup',                   => @stopDragging()
+    @subs.add $body.on 'mousemove',             (e) => @mousemove       e
+    @subs.add @on      'mousedown', '.new-btn', (e) => @newBtnMouseDown e
+    @subs.add @on      'mousedown', '.btn',     (e) => @btnMousedown    e
+    @subs.add @on      'keydown',   '.btn',     (e) => @btnKeyDown      e
+    @subs.add @on      'click',     '.btn',     (e) => @btnClick        e
 
   destroy: ->
-    @unsubscribe()
+    @subs.dispose()
     @detach()
 

@@ -22,7 +22,7 @@ class CommandToolbar
       @state.opened = yes
     if @state.opened then @toggle yes
     
-    atom.workspaceView.command "command-toolbar:toggle", => @toggle()
+    @sub = atom.commands.add 'atom-workspace', 'command-toolbar:toggle': => @toggle()
     
   toggle: (forceOn) ->
     if forceOn or not @state.opened
@@ -38,6 +38,7 @@ class CommandToolbar
   destroyToolbar: -> @toolbarView?.destroy()
     
   deactivate: ->
+    @sub.dispose()
     @destroyToolbar()
     
 module.exports = new CommandToolbar

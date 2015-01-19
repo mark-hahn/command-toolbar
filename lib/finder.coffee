@@ -1,5 +1,5 @@
 _ = require 'underscore-plus'
-{$, $$, SelectListView} = require 'atom'
+{$, $$, SelectListView} = require 'atom-space-pen-views'
 
 module.exports =
 class CommandPaletteView extends SelectListView
@@ -18,23 +18,19 @@ class CommandPaletteView extends SelectListView
   attach: (@callback) ->
     @storeFocusedElement()
 
-    if @previouslyFocusedElement[0] and @previouslyFocusedElement[0] isnt document.body
-      @eventElement = @previouslyFocusedElement
-    else
-      @eventElement = atom.workspaceView
-    @keyBindings = atom.keymap.findKeyBindings(target: @eventElement[0])
+    # if @previouslyFocusedElement[0] and @previouslyFocusedElement[0] isnt document.body
+    #   @eventElement = @previouslyFocusedElement
+    # else
+    #   @eventElement = atom.workspaceView
+    # @keyBindings = atom.keymap.findKeyBindings(target: @eventElement[0])
+    
+    workSpaceView = atom.views.getView atom.workspace
+    @keyBindings = atom.keymap.findKeyBindings target: workSpaceView
+    commands = atom.commands.findCommands      target: workSpaceView
+    commands = _.sortBy commands, 'displayName'
+    @setItems commands
 
-    if atom.commands?
-      commands = atom.commands.findCommands(target: @eventElement[0])
-    else
-      commands = []
-      for eventName, eventDescription of _.extend($(window).events(), @eventElement.events())
-        commands.push({name: eventName, displayName: eventDescription, jQuery: true}) if eventDescription
-
-    commands = _.sortBy(commands, 'displayName')
-    @setItems(commands)
-
-    atom.workspaceView.append(this)
+    $(workSpaceView).append @
     @focusFilterEditor()
 
   viewForItem: ({name, displayName}) ->
@@ -48,5 +44,9 @@ class CommandPaletteView extends SelectListView
 
   confirmed: ({name}) ->
     @cancel()
+    @closest('.command-toolbar-palette').remove()
     @callback name
+    
+  cancelled: ->
+    @closest('.command-toolbar-palette').remove()
     
