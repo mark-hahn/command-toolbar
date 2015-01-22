@@ -162,11 +162,7 @@ class ToolbarView extends View
     if /^(https?|file):\/\//i.test name
       atom.workspace.open name.replace /^file:\/\//, ''
     else
-      for eventName, eventDescription of _.extend($(window).events(), eventEle.events())
-        if eventDescription
-          eventEle.trigger name
-          return
-      eventEle.dispatchEvent(new CustomEvent(name, bubbles: true, cancelable: true))
+      atom.commands.dispatch atom.views.getView(atom.workspace.getActivePaneItem()), name
   
   btnClick: (e) ->
     if e.ctrlKey or e.altKey then @startEditing e; return

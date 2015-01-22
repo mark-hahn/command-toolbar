@@ -1,4 +1,7 @@
 
+## 1.0.3 - 2015-01-19
+* Fixed command dispatch
+
 ## 1.0.2 - 2015-01-19
 * Fixed deprecations
 
