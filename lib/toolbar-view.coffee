@@ -153,10 +153,6 @@ class ToolbarView extends View
     @buttonEditing = null
   
   executeCmd: (e) ->
-    prevFocusedEle = $ ':focus'
-    if prevFocusedEle[0] and prevFocusedEle[0] isnt document.body
-         eventEle = prevFocusedEle
-    else eventEle = atom.views.getView atom.workspace
     if @buttonEditing and @buttonEditing[0] isnt e.target then @stopEditing()
     name = @get$Btn(e).attr 'data-cmd'
     if /^(https?|file):\/\//i.test name

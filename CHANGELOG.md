@@ -1,4 +1,7 @@
 
+## 1.0.4 - 2015-01-28
+* Cleaned up executeCmd
+
 ## 1.0.3 - 2015-01-19
 * Fixed command dispatch
 
