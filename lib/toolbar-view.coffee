@@ -158,7 +158,8 @@ class ToolbarView extends View
     if /^(https?|file):\/\//i.test name
       atom.workspace.open name.replace /^file:\/\//, ''
     else
-      atom.commands.dispatch atom.views.getView(atom.workspace.getActivePaneItem()), name
+      ele = atom.workspace.getActivePaneItem() ? atom.workspace
+      atom.commands.dispatch atom.views.getView(ele), name
   
   btnClick: (e) ->
     if e.ctrlKey or e.altKey then @startEditing e; return
