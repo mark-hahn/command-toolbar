@@ -6,6 +6,7 @@
 fs             = require 'fs'
 _              = require 'underscore-plus'
 Finder         = require './finder'
+subAtom        = require 'sub-atom'
 
 module.exports =
 class ToolbarView extends View
@@ -15,15 +16,15 @@ class ToolbarView extends View
       @div outlet:'newBtn', class:'new-btn command-toolbar-btn'
               
   initialize: (commandToolbar, @state) ->
-    @subs = new CompositeDisposable
+    @subs = new subAtom
     @$workspace = $ atom.views.getView atom.workspace
     @updateSide null, yes
     
     closeTtEvents = 'mousedown mouseout mouseleave'
-    @subs.add @.on 'mouseover',   '.command-toolbar-btn', (e) => @chkTooltip e
-    @subs.add @.on closeTtEvents, '.command-toolbar-btn',     => @closeTooltip()
+    @subs.add @, 'mouseover',   '.command-toolbar-btn', (e) => @chkTooltip e
+    @subs.add @, closeTtEvents, '.command-toolbar-btn',     => @closeTooltip()
     for btn in (@state.buttons ?= []) then @addBtn btn...
-    @subs.add @newBtn.on 'click', (e) =>
+    @subs.add @newBtn, 'click', (e) =>
       if e.ctrlKey or e.altKey
         @addTabBtn()
       else
@@ -270,13 +271,13 @@ class ToolbarView extends View
     
   setupBtnEvents: ->
     $body = $ 'body'
-    @subs.add $body.on '[contenteditable]',         => @stopEditing()
-    @subs.add $body.on 'mouseup',                   => @stopDragging()
-    @subs.add $body.on 'mousemove',             (e) => @mousemove       e
-    @subs.add @on      'mousedown', '.new-btn', (e) => @newBtnMouseDown e
-    @subs.add @on      'mousedown', '.btn',     (e) => @btnMousedown    e
-    @subs.add @on      'keydown',   '.btn',     (e) => @btnKeyDown      e
-    @subs.add @on      'click',     '.btn',     (e) => @btnClick        e
+    @subs.add $body, '[contenteditable]',         => @stopEditing()
+    @subs.add $body, 'mouseup',                   => @stopDragging()
+    @subs.add $body, 'mousemove',             (e) => @mousemove       e
+    @subs.add @,     'mousedown', '.new-btn', (e) => @newBtnMouseDown e
+    @subs.add @,     'mousedown', '.btn',     (e) => @btnMousedown    e
+    @subs.add @,     'keydown',   '.btn',     (e) => @btnKeyDown      e
+    @subs.add @,     'click',     '.btn',     (e) => @btnClick        e
 
   destroy: ->
     @subs.dispose()

@@ -1,6 +1,9 @@
 
+## 1.0.6 - 2015-02-10
+* Fixed deactivate
+
 ## 1.0.5 - 2015-02-06
-* Fixed using when no tabs
+* Fixed problem when no tabs
 
 ## 1.0.4 - 2015-01-28
 * Cleaned up executeCmd
