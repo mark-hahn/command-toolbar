@@ -6,8 +6,16 @@ pathUtil    = require 'path'
 ToolbarView = require './toolbar-view'
 
 class CommandToolbar
-  configDefaults: 
-    alwaysShowToolbarOnLoad: yes
+  config:
+    alwaysShowToolbarOnLoad:
+      title: 'Always show command bar when Atom opens'
+      type: 'boolean'
+      default: true
+
+    useRightPane:
+      title: 'Open web pages in a right pane'
+      type: 'boolean'
+      default: false
 
   activate: ->
     @state = 

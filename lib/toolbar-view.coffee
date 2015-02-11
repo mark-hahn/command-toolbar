@@ -157,7 +157,9 @@ class ToolbarView extends View
     if @buttonEditing and @buttonEditing[0] isnt e.target then @stopEditing()
     name = @get$Btn(e).attr 'data-cmd'
     if /^(https?|file):\/\//i.test name
-      atom.workspace.open name.replace /^file:\/\//, ''
+      options = 
+        (if atom.config.get 'command-toolbar.useRightPane' then split:'right' else {})
+      atom.workspace.open name.replace(/^file:\/\//, ''), options
     else
       ele = atom.workspace.getActivePaneItem() ? atom.workspace
       atom.commands.dispatch atom.views.getView(ele), name
