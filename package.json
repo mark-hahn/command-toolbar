@@ -1,13 +1,13 @@
 {
   "name": "command-toolbar",
   "main": "./lib/command-toolbar",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A toolbar with easily customized buttons for any command.",
   "activationEvents": [],
   "repository": "https://github.com/mark-hahn/command-toolbar",
   "license": "MIT",
   "engines": {
-    "atom": ">0.170.0"
+    "atom": ">0.190.0"
   },
   "dependencies": {
     "underscore-plus": "1.x",

@@ -1,4 +1,7 @@
 
+## 1.0.8 - 2015-05-18
+* keymap.cson deprecation
+
 ## 1.0.7 - 2015-02-11
 * added setting to open web pages in right pane
 

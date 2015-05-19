@@ -33,6 +33,7 @@ class ToolbarView extends View
     @setupBtnEvents()
     
   saveState: ->
+    # console.log 'saveState cwd', @state.statePath, process.cwd(), fs.existsSync @state.statePath
     try
       fs.writeFileSync @state.statePath, JSON.stringify @state
     catch e
