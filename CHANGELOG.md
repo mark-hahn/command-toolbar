@@ -1,4 +1,7 @@
 
+## 1.0.9 - 2015-05-25
+* style deprecation
+
 ## 1.0.8 - 2015-05-18
 * keymap.cson deprecation
 
