@@ -1,4 +1,7 @@
 
+## 1.0.10 - 2015-05-26
+* fixed selectors
+
 ## 1.0.9 - 2015-05-25
 * style deprecation
 
