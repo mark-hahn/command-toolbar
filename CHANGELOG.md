@@ -1,4 +1,7 @@
 
+## 1.0.11 - 2015-05-31
+* removed activation events
+
 ## 1.0.10 - 2015-05-26
 * fixed selectors
 
