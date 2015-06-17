@@ -1,4 +1,7 @@
 
+## 1.0.12 - 2015-06-17
+* fixed command pallete
+
 ## 1.0.11 - 2015-05-31
 * removed activation events
 
