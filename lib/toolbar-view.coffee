@@ -28,7 +28,7 @@ class ToolbarView extends View
       if e.ctrlKey or e.altKey
         @addTabBtn()
       else
-        new Finder().attach (name) => @addBtn name, name, yes
+        new Finder().show (name) => @addBtn name, name, yes
       false
     @setupBtnEvents()
     
